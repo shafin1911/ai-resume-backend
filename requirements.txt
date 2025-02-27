@@ -1,0 +1,25 @@
+# Core FastAPI & Backend Packages
+fastapi==0.109.0
+uvicorn==0.27.0
+pydantic==2.6.0
+python-dotenv==1.0.1
+
+# Database
+sqlalchemy==2.0.27
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# AI & NLP (Hugging Face, LangChain, etc.)
+transformers==4.38.1
+langchain==0.1.14
+chromadb==0.4.22
+sentence-transformers==2.6.1
+pdfminer.six==20221105
+
+# Background Tasks & Caching
+celery==5.3.6
+redis==5.0.1
+
+# Optional: Dev Tools
+black==24.2.0  # Code formatting
+isort==5.13.2  # Code import sorting
