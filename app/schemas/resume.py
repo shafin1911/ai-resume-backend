@@ -32,8 +32,18 @@ class ResumeUpdate(BaseModel):
 
 
 # ✅ Schema for response (includes `id`)
-class ResumeResponse(ResumeBase):
+class ResumeResponse(BaseModel):
     id: int
+    name: str
+    email: str
+    phone: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    skills: Optional[str] = None
+    experience: Optional[str] = None  # Original experience
+    improved_experience: Optional[str] = None  # ✅ New field
+    parsed_text: Optional[str] = None
 
-    class Config:
-        orm_mode = True  # Enables SQLAlchemy ORM support
+
+# ✅ Schema for improved ai resume response
+class ResumeImprovementResponse(BaseModel):
+    improved_experience: str  # Make sure this matches what AI returns

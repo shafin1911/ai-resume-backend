@@ -13,4 +13,6 @@ class Resume(Base):
     skills = Column(Text, nullable=True)
     experience = Column(Text, nullable=True)
     education = Column(Text, nullable=True)
-    parsed_text = Column(Text, nullable=True)  # Store extracted text from PDF
+    parsed_text = Column(Text, nullable=True)
+    improved_experience = Column(Text, nullable=True)  # New column
+    ai_cover_letter = Column(Text, nullable=True)  # New column
