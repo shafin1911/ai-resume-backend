@@ -1,104 +1,101 @@
 import os
 from transformers import pipeline
-import httpx
+from langchain_community.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
 
-# Default model (Free Qwen)
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "")
+# Default AI Model (Qwen Free)
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "qwen/qwen2.5-vl-72b-instruct:free")
 DEFAULT_API_KEY = os.getenv("DEFAULT_API_KEY", "")  # Optional: Store in .env
 
 
-# ✅ Function to improve resume text using OpenAI
+# ✅ Improve Resume Using OpenRouter via LangChain
 def improve_resume(
     resume_text: str, user_model: str = None, user_api_key: str = None
 ) -> str:
-    """Improve resume text using AI (OpenRouter API)."""
+    """Improve resume experience using OpenRouter AI."""
+    model = user_model or DEFAULT_MODEL
+    api_key = user_api_key or DEFAULT_API_KEY
 
-    model = user_model if user_model else DEFAULT_MODEL
-    api_key = user_api_key if user_api_key else DEFAULT_API_KEY
+    llm = ChatOpenAI(
+        model=model,
+        openai_api_key=api_key,
+        openai_api_base="https://openrouter.ai/api/v1",
+    )
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are an AI resume optimizer. "
+                "Your task is to take an input resume and improve it while maintaining the original structure, formatting, and sectioning. "
+                "The output should be a complete and professional resume in markdown format, without any extra explanations, questions, or placeholders. "
+                "Only return the final resume.",
+            ),
+            (
+                "human",
+                "Improve this resume while keeping proper sectioning and structure:\n{resume_text}\n\n"
+                "Ensure the resume has a clear Markdown format, structured sections (such as **Summary, Experience, Education, Skills, Projects**), "
+                "and is well-formatted without any additional text, comments, or requests for more details.",
+            ),
+        ]
+    )
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
+    chain = prompt | llm
+    response = chain.invoke({"resume_text": resume_text})
 
-    payload = {
-        "model": model,
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are an expert ATS-friendly resume optimizer.",
-            },
-            {
-                "role": "user",
-                "content": f"Improve this resume (keep markdown structure):\n{resume_text}",
-            },
-        ],
-    }
-
-    response = httpx.post(url, headers=headers, json=payload)
-    response_json = response.json()
-
-    # ✅ Debug log AI response
-    print("🔹 AI Response:", response_json)
-
-    if "choices" not in response_json:
-        return "Error: AI response is invalid."
-
-    return response_json["choices"][0]["message"]["content"]
+    return response.content if hasattr(response, "content") else str(response)
 
 
-# ✅ Function to summarize experience using Hugging Face
+# ✅ Summarize Experience Using Hugging Face
 def summarize_experience(resume_text: str) -> str:
-    summarizer = pipeline("summarization")
+    """Summarize experience using a pre-trained summarization model."""
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    max_length = 1024
+    resume_text = resume_text[:max_length]  # Ensure within model limits
     summary = summarizer(resume_text, max_length=150, min_length=50, do_sample=False)
     return summary[0]["summary_text"]
 
 
-# ✅ Function to generate AI-powered cover letters
-def generate_cover_letter(
+# ✅ New Function for Job-Specific Resume Improvement
+def optimize_resume_for_job(
+    resume_text: str,
     job_description: str,
-    experience: str,
     user_model: str = None,
     user_api_key: str = None,
 ) -> str:
-    """
-    AI-generated cover letter based on job description and experience.
-    - Allows users to specify their own AI model & API key.
-    - Uses a free model by default.
-    """
+    """Optimize an existing resume to better match a job description using OpenRouter AI."""
+    model = user_model or DEFAULT_MODEL
+    api_key = user_api_key or DEFAULT_API_KEY
 
-    model = user_model if user_model else DEFAULT_MODEL
-    api_key = user_api_key if user_api_key else DEFAULT_API_KEY
+    llm = ChatOpenAI(
+        model=model,
+        openai_api_key=api_key,
+        openai_api_base="https://openrouter.ai/api/v1",
+    )
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are an AI resume optimizer specializing in tailoring resumes for specific jobs. "
+                "Your task is to enhance an input resume so that it better aligns with the given job description, "
+                "while maintaining the resume's original structure and formatting. "
+                "Ensure the final output is in professional Markdown format and requires no additional modifications.",
+            ),
+            (
+                "human",
+                "Here is a resume that needs to be improved for a job:\n\n"
+                "**Job Description:**\n{job_description}\n\n"
+                "**Current Resume:**\n{resume_text}\n\n"
+                "Improve the resume so it is highly relevant to the job, keeping its structure (such as **Summary, Experience, Education, Skills, Projects**), "
+                "and formatting intact. The output should be a fully improved Markdown resume with no extra explanations, questions, or placeholders.",
+            ),
+        ]
+    )
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
+    chain = prompt | llm
+    response = chain.invoke(
+        {"resume_text": resume_text, "job_description": job_description}
+    )
 
-    payload = {
-        "model": model,
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are an expert in writing professional cover letters.",
-            },
-            {
-                "role": "user",
-                "content": f"Write a professional cover letter for this job:\n{job_description}\nBased on this experience:\n{experience}. Output should be in markdown format.",
-            },
-        ],
-    }
-
-    response = httpx.post(url, headers=headers, json=payload)
-    response_json = response.json()
-
-    print("🔹 AI Cover Letter Response:", response_json)
-
-    if "choices" not in response_json:
-        return f"Error: {response_json}"
-
-    return response_json["choices"][0]["message"]["content"]
+    return response.content if hasattr(response, "content") else str(response)

@@ -3,6 +3,11 @@ fastapi==0.109.0
 uvicorn==0.27.0
 pydantic[email]==2.6.0
 python-dotenv==1.0.1
+passlib
+bcrypt
+pymupdf 
+pdfplumber
+python-multipart
 
 # Database
 sqlalchemy==2.0.27
@@ -10,11 +15,19 @@ psycopg2-binary==2.9.9
 alembic==1.13.1
 
 # AI & NLP (Hugging Face, LangChain, etc.)
+openai==1.11.0
 transformers==4.37.2
 langchain==0.1.12
+langchain-community
 chromadb==0.4.22
 sentence-transformers==2.6.1
 pdfminer.six==20221105
+tiktoken==0.5.2
+sentence-transformers
+
+# PyTorch for deep learning models
+torch==2.1.2  
+numpy
 
 # Background Tasks & Caching
 celery==5.3.6

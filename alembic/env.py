@@ -6,7 +6,10 @@ from alembic import context
 from dotenv import load_dotenv
 
 from app.database import Base
-from app.models import resume  # Ensure models are imported
+from app.models import user
+from app.models import resume
+from app.models import job
+
 
 # Load environment variables from .env
 load_dotenv()
